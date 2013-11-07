@@ -9,5 +9,5 @@ Planet::Planet(double dX0, double dY0, double dZ0, double dvx0, double dvy0, dou
     vy0 = dvy0;
     vz0 = dvz0;
 
-    M = dM/MSun;
+    M = dM;
 }

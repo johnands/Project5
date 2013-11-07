@@ -1,7 +1,7 @@
 from scitools.std import *
 import sys
 
-def plot_orbit():
+def extract_positions():
     infile1 = open('positions.dat', 'r')
 
     # number of objects
@@ -33,31 +33,40 @@ def plot_orbit():
         y.append(yy)
         z.append(zz)
 
-        infile1.close()
+    infile1.close()
 
     x = array(x) 	# [[x00 x01 x02], [x10 x11 x12] ...
     y = array(y)
     z = array(z)
 
+    return x, y, z, n
+
+
+def plot_orbit():
+    x, y, z, n = extract_positions()
+    
     # the x-values of the Sun is then the first column of x, which is indexed as x[::,0] and so on
     for i in range(n):
         plot(x[::,i], y[::,i])
         hold('on')
     hold('off')
-
-    if n == 2:
-        legend('Sun', 'Earth')
-    elif n == 3:
-        legend('Sun', 'Earth', 'Jupiter')
-    elif n == 10:
-        legend('Sun', 'Mercury', 'Venus', 'Earth', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto')
-
+    legend('Sun', 'Earth')
     xlabel('x position [AU]')
     ylabel('y position [AU]')
     axis('equal')
-
     raw_input('Press Return key to quit: ')
 
+"""
+def plot_cluster():
+    x, y, z, n = extract_positions()
+
+    # remove previously generated plot files
+    import glob, os
+    for filename in glob.glob('cluster*.png'):
+        os.remove(filename)
+
+    plot
+"""
 
 def plot_energymom():
     infile2 = open('energymom.dat', 'r')
@@ -132,10 +141,12 @@ def plot_radius(method):
 
 ### main ###
 #plot_orbit()
-#plot_energymom()'
+#plot_energymom()
 
-method = int(sys.argv[1])
-plot_radius(method)
+#method = int(sys.argv[1])
+#plot_radius(method)
+
+
 
 
 
