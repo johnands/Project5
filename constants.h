@@ -1,3 +1,5 @@
+#include <cmath>
+
 /*
 ** Constants
 */
@@ -6,5 +8,5 @@
 extern const double pi;
 
 // Physical
-extern const double MSun;       // mass of Sun
-extern const double G;          // gravitational constant
+//extern const double MSun;       // mass of Sun (only needed in a))
+//extern const double G;          // gravitational constant (only needed in a))

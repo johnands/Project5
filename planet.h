@@ -15,6 +15,7 @@ public:
     double vz0;
 
     double M;
+    //double M = M/Msun (only in a))
 
     // constructor
     Planet(double, double, double, double, double, double, double);
