@@ -1,6 +1,5 @@
 #include <iostream>
 #include <cmath>
-#include "constants.h"
 #include "planet.h"
 #include <armadillo>
 #include <time.h>
@@ -9,7 +8,6 @@
 using namespace std;
 using namespace arma;
 
-// class to make planet objects containing data of each planet: mass, x0, y0, vx0, vy0
 class Solver {
 public:
     int n;
@@ -18,19 +16,18 @@ public:
     int N;
     double R0;
     double mu;
+    double eps2;
 
     double h;
     double h2;
     double G;
     Planet **B;
     vec A;
-
-    // file variables
-    fstream *outFile1;
-    //fstream outFile2;
+    vec K;
+    vec U;
 
     // constructor
-    Solver(int, double, double, int, double, double);
+    Solver(int, double, double, int, double, double, double);
 
     // initialization functions
     void init_cluster();
@@ -40,5 +37,7 @@ public:
     void RK4();
     void Leap_Frog();
     vec f(vec, int check = 1);
-    void write_to_file();
+
+    // particle energies
+    void energy();
 };
