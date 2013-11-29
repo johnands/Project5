@@ -23,6 +23,8 @@ Solver::Solver(int dn, double dt_min, double dt_max, int dN, double dR0, double 
 }
 
 void Solver::init_cluster() {
+    ofstream outFile6; outFile6.open("mass.dat");
+
     // initialize cluster
     long idum = -1;                 // seed
     double u, v, w;                 // uniformly dist. coordinates
@@ -42,6 +44,7 @@ void Solver::init_cluster() {
 
         // gaussian distributed masses
         M = sigma*gaussian_deviate(&idum) + mu;
+        outFile6 << M << endl;
 
         // make pointer to class object (zero initial velocity)
         B[i] = new Planet(x, y, z, 0.0, 0.0, 0.0, M);
@@ -157,6 +160,7 @@ void Solver::Leap_Frog() {
         outFile2 << endl;
         outFile4 << endl;
     }
+
     finish = clock();
     // write out time usage
     cout << "Time elapsed Leap-Frog: " << ((finish-start)/CLOCKS_PER_SEC) << " s" << endl;
@@ -195,6 +199,10 @@ vec Solver::f(vec A, int check) {
             ax = ay = az = 0.0;
             // i is current planet, j is the other planets
             // must find the force on planet i from the other planets j
+
+// parallelize
+#pragma omp parallel for shared(ax,ay,az) private(r)
+
             for (int j=0; j<n; j++) {
                 if (i != j) {
                     r = sqrt(pow(A(6*j)-A(6*i),2) + pow(A(6*j+1)-A(6*i+1),2) + pow(A(6*j+2)-A(6*i+2),2));
@@ -216,8 +224,11 @@ return dAdt;
 // function to find particle energies
 void Solver::energy()
 {
-    double r, dU = 0;
+    ejected_particles = 0;
+    ejected_energy = 0;
+    double r, dU;
     for (int i=0; i<n; i++) {
+        dU = 0;
         K(i) = 0.5*B[i]->M*(pow(A(6*i+3),2) + pow(A(6*i+4),2) + pow(A(6*i+5),2));
         for (int j=0; j<n; j++) {
             if (i != j) {
@@ -226,7 +237,10 @@ void Solver::energy()
             }
         }
         U(i) = dU;
-
+        if ((K(i) + U(i)/2) > 0) {
+            ejected_particles += 1;
+            ejected_energy += K(i) + U(i);
+        }
     }
 }
 

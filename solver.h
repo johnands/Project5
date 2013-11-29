@@ -25,6 +25,8 @@ public:
     vec A;
     vec K;
     vec U;
+    double ejected_energy;
+    int ejected_particles;
 
     // constructor
     Solver(int, double, double, int, double, double, double);
