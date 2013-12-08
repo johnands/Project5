@@ -154,7 +154,7 @@ where $q$ is the number of particles within the shell.
 
 \begin{figure}
         \includegraphics[scale=0.5]{sphere.png}
-        \caption{\textit{Illustration from $ http://en.wikipedia.org/wiki/List_of_moments_of_inertia$}
+        \caption{\textit{Illustration from $ http://en.wikipedia.org/wiki/List_of_moments_of_inertia$}}
         \label{fig:sphere}
 \end{figure}
         
@@ -239,9 +239,9 @@ void Solver::RK4() {
         k2 = f(A + k1*h2);
         k3 = f(A + k2*h2);
         k4 = f(A + k3*h);
-        A += (h/6.0)*(k1 + 2*k2 + 2*k3 + k4);  
+        A += (h/6.0)*(k1 + 2*k2 + 2*k3 + k4);
         
-        .....         
+        .....
     }
 }
 \end{lstlisting}
@@ -343,15 +343,15 @@ void Solver::LeapFrog() {
 \end{lstlisting}
 
 \subsection*{Implementing the methods}
-In my program I have two external classes; one that holds the values of various constants, like the gravitational constant, the masses of the different objects and so on, and one class "Planet". The latter creates an instance when called upon that contains information of the initial position and velocity and the mass corresponding to the object. For instance,
+In our program we have two classes: $Solver$ and $Planet$. $Solver$ does the majority of the tasks, including initialization of system parameters and objects. It also contains one  solver function for each method (RK4 and Leap-Frog) in addition to functions calculating energies. $Planet$ creates an instance when called upon that contains information on the initial position, initial velocity and mass of each object.
 
 \begin{lstlisting}[title={Making of instance}]
 planet Earth = planet(1.0, 0.0, 0.0, 0.0, 2.*pi, 0.0, M_earth);
 \end{lstlisting}
 
-makes an instance Earth that contains the initial $x, y, z$ - positions and $v_x, v_y, v_z$ - velocities and the mass of the Earth.
+makes an instance Earth that contains the initial $x, y, z$ - positions and $v_x, v_y, v_z$ - velocities and the mass of Earth.
 
-I then create a vector $A$ that contains the initial positions, $(x,y,z)$, and the velocities, $(v_x,v_y,v_z)$, for all objects.
+We then use these $Planet$ objects to create a vector $A$ that contains the initial positions, $(x,y,z)$, and the velocities, $(v_x,v_y,v_z)$, for all objects:
 
 \[ A = \left( \begin{array}{c}
 x - object \hspace*{0.5mm} 1\\
@@ -364,11 +364,11 @@ x - object \hspace*{0.5mm} 2\\
 ... \\
 vz - object \hspace*{0.5mm} n \end{array} \right)\]
 
-I have a function that finds the time derivative of these values, $dAdt$. The time derivative of the position is simply the velocity, and that value is already saved in $A$ and easy to obtain. To find the acceleration, that is the time derivative of the velocities, I use Newtons second law. For each planet we then sum over the gravitational forces working on it from all the other objects, and thus find the acceleration.
+$Solver$ also contains a function that finds the time derivative of these values, $dAdt$. The time derivative of the position is simply the velocity, and that value is already saved in $A$ and easy to obtain. To find the acceleration, that is the time derivative of the velocities, we use Newton's second law: For each object we sum the gravitational forces working on it from all the other objects according to Newton's gravitational law and divide by its mass.
 
-To calculate the time propagation of the objects, I use the Runge-Kutta and the Leap-Frog methods discussed above. Both calculating the propagation forward in time starting from the given initial conditions.
+To calculate the time propagation of the objects, we use RK4 and Leap-Frog as discussed above, both calculating the propagation forward in time starting from the given initial conditions.
 
-My program is built in such a way that the function calculating the derivatives, the Runge-Kutta and the Leap-Frog solver works for different lengths of the vector $A$. Thus to change my program from the two-body system to the $N$-body system it is only the initial value of $A$ that needs changing.
+Our program is built to solve the problem regardless of the dimension of $A$. Thus to change our system from the two-body problem to the $N$-body star cluster we need only change the initial system state vector $A$.
 
 For the two-body system the initial conditions is quite straight forward
 
@@ -398,12 +398,11 @@ For the two-body system the initial conditions is quite straight forward
 
         M(i) = B[i].M;
         
-    }
+   }
+\end{lstlisting}
  
- \end{lstlisting}
  
- 
-For the $N$-body system, however, the initial conditions are a bit more challenging. We wish to place our $N$ particles in a uniform, random distribution within a sphere of radius $R_0$. The initial velocities are easy. We will simulate what is called a "cold collapse", and start our particles with no initial velocity. The particles should be randomly distributed by a Gaussian distribution around ten solar masses with a standard deviation of one solar mass.
+For the $N$-body system, however, the initial conditions are a bit more challenging. We wish to start with a uniform, random distribution of $N$ particles within a sphere of radius $R_0$. The initial velocities are easy: We will simulate what is called a "cold collapse", starting our particles with no initial velocity. The particle masses are randomly distributed by a Gaussian distribution around ten solar masses with a standard deviation of one solar mass.
 
 
 \subsubsection*{Uniformly distributed random coordinates within a sphere and randomly distributed mass}
@@ -411,11 +410,14 @@ For the $N$-body system, however, the initial conditions are a bit more challeng
 To find the coordinates of the particles we used the function $ran2$ that was available from the web page. It yields a random number between 0 and 1 when called upon with a negative seed. For our purpose we wish to convert these numbers into coordinates of uniformly distributed particles within a sphere of radius $R_0$.
 
 To do this one can use spherical coordinates
-\begin{align}
-x = r sin \theta cos \phi \\
-y = r sin \theta sin \phi \\
-z = r cos \theta
-\end{align}
+\begin{equation}
+\begin{split}
+x &= r sin \theta cos \phi \\
+y &= r sin \theta sin \phi \\
+z &= r cos \theta
+\end{split}
+\end{equation}
+
 
 where $ \theta \hspace{0.5mm} \epsilon \hspace{0.5mm} [0, \pi], \phi \hspace{0.5mm} \epsilon \hspace{0.5mm} [0, 2\pi], r \hspace{0.5mm} \epsilon \hspace{0.5mm} [0, R_0]$.
  
@@ -441,8 +443,7 @@ r = R_0 \sqrt[3]{u} \hspace{1cm}\mathrm{and}\hspace{1cm}
 
 After calculating these values it is easy to transform back to $(x,y,z)$-coordinates using the expressions for the spherical coordinates.
 
-
-The mass of the objects should be randomly distributed by a Gaussian distribution around ten solar masses with a standard deviation of a solar mass. We used the function $gaussian_deviate$, which has a standard deviation $ \sigma = 1$ and is centred around zero. To get our wanted distribution with a standard deviation of $1$ and centration around ten solar masses we used
+The mass of the objects should be randomly distributed by a Gaussian distribution around ten solar masses with a standard deviation of a solar mass. We used the function $gaussian_deviate$, which has a standard deviation $ \sigma = 1$ and is centred around zero. To get our wanted distribution with a standard deviation of $1$ and average of ten solar masses we used
 $$ M = \sigma gaussian_deviate() + \mu $$
 where $\sigma = 1$ and $\mu = 10$.
 
@@ -475,17 +476,14 @@ where $\sigma = 1$ and $\mu = 10$.
   
 \end{lstlisting}
 
-
-\subsection*{Radial density}
-To calculate the radial density we look at the total energy for each object at a time t. Looping over the energies we pick put the objects that has a negative total energy and thus are bound. Using the mass and position of these particles we then calculate the center of mass. We then write the radius relative to the center of mass to a file.
-
-
-   
+ 
 \subsection*{Results}
 
-Running our program for the two methods we see that with the right choice of time step both yields the wanted trajectory with the Earth in circular orbit around the Sun. See figure \ref{dt_0.002}.
+\subsubsection*{Comparing the algorithms}
 
-\begin{figure}
+We have tested our program for the two-body-problem Sun-Earth to find out which method that works best for this type of gravitational problem. We saw that with the right choice of time step both yields the wanted trajectory with the Earth in circular orbit around the Sun. See figure \ref{dt_0.002}.
+
+\begin{figure}[H]
         \centering
         \begin{subfigure}[b]{0.6\textwidth}
                 \includegraphics[width=\textwidth]{RK4_n_1000_t_2.pdf}
@@ -502,15 +500,15 @@ Running our program for the two methods we see that with the right choice of tim
 \label{dt_0.002}
 \end{figure}
 
-However, when running for different time steps we found that our algorithm highly depends on the choice of step. The program will not yield the wanted result if we do not choose the right time step. From the figures \ref{dt_0.002} we see that time step $\Delta t = 0.002$ gives the wanted trajectory for both methods, while a time step of the size $\Delta t = 0.1$, \ref{dt0.1}, is unstable for both methods.
+These nice results are however not produced if the time step is large enough. From the figures \ref{dt_0.002} we see that time step $\Delta t = 0.002$ gives the wanted trajectory for both methods, while a time step of the order $\Delta t = 0.1$, \ref{dt0.1}, is unstable for both methods.
 
-From the figures \ref{timestep} we see that the Leap-Frog method is less vulnerable to the wrong choice of time step than the Runge-Kutta solver. The radius should be constant at $1 AU$, but for large time steps we see that both methods get highly unstable. We see from the figures that while the Leap-Frog method tolerates a larger time step than the Runge-Kutta method before it gets unstable.
+From the figures \ref{timestep} we see that the Leap-Frog method is less vulnerable to the wrong choice of time step than the Runge-Kutta solver. The radius should be constant at $1 AU$, but for large time steps we see that both methods get highly unstable. However, the Leap-Frog method tolerates a larger time step than the Runge-Kutta method before it gets unstable.
 
 
 We see that for $\Delta t = 0.1$ the Runge-Kutta method gives a solution where the Earth starts spirals in towards the Sun. As the Earth gets too close to the Sun, a time step that was reasonable for more distant objects is far to large when we get close to the Sun. And thus we get the effect we see from figure \ref{dt0.1}; the Earth escapes from the Sun's gravitational field.
 
         
-\begin{figure}
+\begin{figure}[H]
         \centering
         \begin{subfigure}[b]{0.6\textwidth}
                 \includegraphics[width=\textwidth]{RK4_n_80_t_8.pdf}
@@ -527,13 +525,13 @@ We see that for $\Delta t = 0.1$ the Runge-Kutta method gives a solution where t
 \label{dt0.1}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[H]
         \centering
         \begin{subfigure}[b]{0.6\textwidth}
                 \includegraphics[width=\textwidth]{main_totE_rk4_dt_0_1.pdf}
                 \caption{Runge-Kutta method absolute value of the total energy}
                 \label{fig:RK4_dt_0.1}
-        \end{subfigure}%
+        \end{subfigure}
        
         \begin{subfigure}[b]{0.8\textwidth}
                 \includegraphics[width=\textwidth]{totE_main_lf_dt_0_1.pdf}
@@ -545,16 +543,15 @@ We see that for $\Delta t = 0.1$ the Runge-Kutta method gives a solution where t
 \end{figure}
 
         
-\begin{figure}
-        \begin{subfigure}
-                \centering
-                \includegraphics[scale=0.5]{timestep_rk4.pdf}
+\begin{figure}[H]
+        \centering
+        \begin{subfigure}[b]{0.6\textwidth}
+                \includegraphics[width=\textwidth]{timestep_rk4.pdf}
                 \caption{Plot over various time steps and the maximal radius for the Runge-Kutta solver}
                 \label{fig:RK4_timestep}
         \end{subfigure}
-
-        \begin{subfigure}
-                \centering
+        
+        \begin{subfigure}[b]{0.8\textwidth}
                 \includegraphics[scale=0.5]{timestep_LeapFrog.pdf}
                 \caption{Plot over various time steps and the maximal radius for the Leap-Frog solver}
                 \label{fig:LF_timestep}
